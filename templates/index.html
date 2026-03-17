@@ -340,11 +340,12 @@
             body: formData.toString(),
           });
 
-          if (!response.ok) {
-            throw new Error("Failed to index repository.");
-          }
-
           const result = await response.json();
+          if (!response.ok) {
+            const details =
+              result.details || result.error || "Failed to index repository.";
+            throw new Error(details);
+          }
 
           repoStatus.textContent = `Repository indexed successfully. Active repo_id: ${result.repo_id}`;
           repoStatus.classList.add("status-success");
@@ -355,9 +356,9 @@
           );
           await loadRepositories();
         } catch (error) {
-          repoStatus.textContent =
-            "Unable to index repository. Check the URL and try again.";
+          repoStatus.textContent = `Unable to index repository: ${error.message}`;
           repoStatus.classList.add("status-error");
+          addMessage("bot", `Indexing failed: ${error.message}`, "System");
         }
       });
 

@@ -126,28 +126,51 @@ def git_repo(request):
     user_input = ""
     if request.method == "POST":
         user_input = request.POST.get("question", "")
+        if not user_input.strip():
+            return JsonResponse({"error": "Repository URL is required."}, status=400)
+
         repo_id = uuid.uuid4().hex[:12]
         repo_path, db_path = _repo_paths(repo_id)
 
-        repo_ingestion(user_input, repo_path=str(repo_path))
-        # Rebuild vector DB with the same interpreter running Django.
-        subprocess.run(
-            [
-                sys.executable,
-                "store_index.py",
-                "--repo-path",
-                str(repo_path),
-                "--db-path",
-                str(db_path),
-            ],
-            check=True,
-        )
+        try:
+            repo_ingestion(user_input, repo_path=str(repo_path))
+            # Rebuild vector DB with the same interpreter running Django.
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "store_index.py",
+                    "--repo-path",
+                    str(repo_path),
+                    "--db-path",
+                    str(db_path),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
-        qa_by_repo[repo_id] = _build_qa_chain(db_path)
-        request.session["active_repo_id"] = repo_id
-        request.session["active_repo_url"] = user_input
-        _write_repo_meta(repo_id, user_input)
-        return JsonResponse({"response": str(user_input), "repo_id": repo_id})
+            qa_by_repo[repo_id] = _build_qa_chain(db_path)
+            request.session["active_repo_id"] = repo_id
+            request.session["active_repo_url"] = user_input
+            _write_repo_meta(repo_id, user_input)
+            return JsonResponse({"response": str(user_input), "repo_id": repo_id})
+        except Exception as exc:
+            shutil.rmtree(repo_path, ignore_errors=True)
+            shutil.rmtree(db_path, ignore_errors=True)
+
+            error_message = str(exc)
+            if isinstance(exc, subprocess.CalledProcessError):
+                error_message = (exc.stderr or exc.stdout or str(exc)).strip()[:600]
+            if not error_message:
+                error_message = "Unexpected indexing error"
+
+            return JsonResponse(
+                {
+                    "error": "Unable to index repository.",
+                    "details": error_message,
+                },
+                status=400,
+            )
     return JsonResponse({"response": str(user_input)})
 
 
