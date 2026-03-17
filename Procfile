@@ -1,0 +1,1 @@
+web: gunicorn codesphere.wsgi:application --log-file -

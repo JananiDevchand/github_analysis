@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: source-code-analysis-genai
+    env: python
+    buildCommand: pip install -r requirements.txt ; python manage.py collectstatic --noinput
+    startCommand: gunicorn codesphere.wsgi:application --log-file -
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_API_KEY
+        sync: false

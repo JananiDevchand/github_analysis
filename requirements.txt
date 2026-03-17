@@ -14,9 +14,11 @@ python-dotenv>=1.0.0
 
 # Web framework
 django>=4.2
+gunicorn
+whitenoise
 
 # Optional utilities
 GitPython
 
 # Embedding model dependency
-sentence-transformers
+sentence-transformers>=2.7.0
