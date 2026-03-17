@@ -13,12 +13,6 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from langchain_community.vectorstores import Chroma
-from langchain_google_genai import GoogleGenerativeAI
-from langchain.memory import ConversationSummaryMemory
-from langchain.chains import ConversationalRetrievalChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
-
 from src.helper import repo_ingestion
 
 # ---------------------------------------------------------------------------
@@ -41,6 +35,13 @@ def _repo_paths(repo_id):
 
 def _build_qa_chain(db_path):
     """Create a fresh retrieval chain from the persisted vector store."""
+    # Lazy imports keep web process startup fast on cold starts.
+    from langchain_community.vectorstores import Chroma
+    from langchain_google_genai import GoogleGenerativeAI
+    from langchain.memory import ConversationSummaryMemory
+    from langchain.chains import ConversationalRetrievalChain
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectordb = Chroma(persist_directory=str(db_path), embedding_function=embeddings)
     llm = GoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)
