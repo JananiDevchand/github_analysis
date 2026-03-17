@@ -63,7 +63,6 @@ DATABASES = {}
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Django 4.2+ preferred storage config; keeps static handling explicit.
 STORAGES = {
