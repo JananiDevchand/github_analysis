@@ -1,19 +1,26 @@
-from src.helper import repo_ingestion, load_repo, text_splitter, load_embedding
-from dotenv import load_dotenv
+# store_index.py
+import argparse
+
+from src.helper import load_repo, text_splitter, load_embedding
 from langchain.vectorstores import Chroma
-import os
 
-load_dotenv()
+def build_index(repo_path, db_path):
+	# Load documents from the selected repo path
+	documents = load_repo(repo_path)
+	text_chunks = text_splitter(documents)
 
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+	# Load HuggingFace embeddings
+	embeddings = load_embedding()
+
+	# Storing vectors in repo-specific ChromaDB
+	vectordb = Chroma.from_documents(text_chunks, embedding=embeddings, persist_directory=db_path)
+	vectordb.persist()
 
 
-documents = load_repo("repo/")
-text_chunks = text_splitter(documents)
-embeddings = load_embedding()
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description="Build vector index for a repository path.")
+	parser.add_argument("--repo-path", default="repo", help="Path to the cloned repository.")
+	parser.add_argument("--db-path", default="db", help="Path to persist Chroma vector DB.")
+	args = parser.parse_args()
 
-
-#storing vector in choramdb
-vectordb = Chroma.from_documents(text_chunks, embedding=embeddings, persist_directory='./db')
-vectordb.persist()
+	build_index(args.repo_path, args.db_path)

@@ -1,169 +1,424 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+{% load static %}
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Source Code</title>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeSphere | Source Code Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
   </head>
-  <body style="background-color:pink;">
-    <div class="container">
-      <h1>Give Github Repository Link Here:</h1>
-      <br>
-      <hr>
-      <br>
-
-        <div class="row">
-          <div class="col-lg-9">
-            <input class="form-control" type="text" name="question" id="question">
-            
-          </div>
-          <div class="col-lg-3">
-            <!-- <button class="btn btn-primary btn-block" id="submit-button">Send</button> -->
-            <button type="button" class="btn btn-primary" id="submit-button">Send</button>
-          </div>
-        </div>
-        <br>
-        <div class="row">
-          <div class="col">
-            <p id="response"></p>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-icon">CS</span>
+          <div>
+            <h1>CodeSphere</h1>
+            <p>Source Code Analysis Assistant</p>
           </div>
         </div>
 
+        <nav class="menu" aria-label="Primary">
+          <button class="pill active" type="button">Home</button>
+          <button class="pill" type="button">Explore</button>
+          <button class="pill" type="button">Collections</button>
+          <button class="pill" type="button">Insights</button>
+        </nav>
+
+        <div class="top-actions">
+          <button class="icon-btn" type="button" aria-label="Notifications">
+            !
+          </button>
+          <button class="icon-btn" type="button" aria-label="Profile">U</button>
+        </div>
+      </header>
+
+      <section class="hero-card">
+        <div class="hero-copy">
+          <p class="eyebrow">AI-POWERED REPOSITORY DISCOVERY</p>
+          <h2>
+            Browse architectures, dependencies, and code flow in one elegant
+            workspace.
+          </h2>
+          <p>
+            Index any public GitHub repository, then ask precise questions and
+            get contextual answers from your codebase assistant.
+          </p>
+
+          <form id="repoForm" class="repo-form" autocomplete="off">
+            <label for="question">Repository URL</label>
+            <div class="repo-input-wrap">
+              <input
+                id="question"
+                name="question"
+                type="url"
+                placeholder="https://github.com/owner/repo"
+                required
+              />
+              <button type="submit" id="submit-button">Index Repository</button>
+            </div>
+            <p id="repoStatus" class="status-line" aria-live="polite"></p>
+          </form>
+
+          <div class="stats-row">
+            <article>
+              <h3>2.5M+</h3>
+              <p>Vectors Processed</p>
+            </article>
+            <article>
+              <h3>500+</h3>
+              <p>Repos Analyzed</p>
+            </article>
+            <article>
+              <h3>95%</h3>
+              <p>Answer Relevance</p>
+            </article>
+            <article>
+              <h3>24/7</h3>
+              <p>Assistant Ready</p>
+            </article>
+          </div>
+        </div>
+
+        <aside class="assistant-card">
+          <div class="assistant-head">
+            <h3>Live Assistant</h3>
+            <button id="clearChat" class="ghost-btn" type="button">
+              Clear Repo
+            </button>
+          </div>
+          <div class="repo-switcher">
+            <p class="repo-switcher-title">Previous Repositories</p>
+            <div id="repoList" class="repo-list"></div>
+          </div>
+          <div
+            id="messageFormeight"
+            class="chat-feed"
+            role="log"
+            aria-live="polite"
+            aria-label="Conversation"
+          >
+            <div class="message bot">
+              <div class="bubble">
+                Repository assistant is online. Index a repo and ask your first
+                question.
+              </div>
+              <span class="time">System</span>
+            </div>
+          </div>
+
+          <form id="messageArea" class="chat-input" autocomplete="off">
+            <input
+              type="text"
+              id="text"
+              name="msg"
+              placeholder="Ask about architecture, files, or logic..."
+              required
+            />
+            <button type="submit" id="send">Send</button>
+          </form>
+        </aside>
+      </section>
+
+      <section class="section-block">
+        <h3>Browse by Intent</h3>
+        <div class="intent-grid">
+          <article>
+            <h4>Architecture</h4>
+            <p>Trace modules and system design.</p>
+          </article>
+          <article>
+            <h4>Security</h4>
+            <p>Spot risky patterns and weak points.</p>
+          </article>
+          <article>
+            <h4>Refactor</h4>
+            <p>Identify cleanup opportunities quickly.</p>
+          </article>
+          <article>
+            <h4>Bug Hunt</h4>
+            <p>Investigate edge-cases and failures.</p>
+          </article>
+          <article>
+            <h4>Onboarding</h4>
+            <p>Understand codebase structure faster.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <h3>Featured Analysis Views</h3>
+        <p class="section-sub">
+          High-value perspectives generated from indexed repositories.
+        </p>
+        <div class="featured-grid">
+          <article class="feature-card circuit">
+            <span class="tag">Top View</span>
+            <h4>Dependency Graph</h4>
+            <p>Map package relationships and critical coupling points.</p>
+          </article>
+          <article class="feature-card terminal">
+            <span class="tag">Top View</span>
+            <h4>Execution Flow</h4>
+            <p>Understand endpoint to function call chains with context.</p>
+          </article>
+          <article class="feature-card source">
+            <span class="tag">Top View</span>
+            <h4>Code Risk Hotspots</h4>
+            <p>Surface large files, complexity spikes, and brittle logic.</p>
+          </article>
+        </div>
+      </section>
     </div>
 
-    <script src="/static/jquery.min.js" ></script>
-
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
     <script>
+      const repoForm = document.getElementById("repoForm");
+      const repoInput = document.getElementById("question");
+      const repoStatus = document.getElementById("repoStatus");
+      const messageForm = document.getElementById("messageArea");
+      const messageInput = document.getElementById("text");
+      const messageFeed = document.getElementById("messageFormeight");
+      const clearButton = document.getElementById("clearChat");
+      const repoList = document.getElementById("repoList");
 
+      function now() {
+        return new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
 
-      jQuery(document).ready(function() {
+      function escapeHtml(value) {
+        return value
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
 
-        $("#submit-button").click(function(e) {
-          e.preventDefault();
+      function addMessage(role, text, timeLabel) {
+        const wrap = document.createElement("div");
+        wrap.className = `message ${role}`;
 
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
 
-          $.ajax({
-              type: "POST",
-              url: "/chatbot",
-              data: {
-                  question: $("#question").val()
-              },
-              success: function(result) {
-                $("#response").append("<br>Me: "+$("#question").val()+ "<br> response: "+result.response);
-                $("#question").val("")
-              },
-              error: function(result) {
-                  alert('error');
-              }
-          });
+        const timestamp = document.createElement("span");
+        timestamp.className = "time";
+        timestamp.textContent = timeLabel || now();
 
+        wrap.appendChild(bubble);
+        wrap.appendChild(timestamp);
+        messageFeed.appendChild(wrap);
+        messageFeed.scrollTop = messageFeed.scrollHeight;
+      }
 
+      function shortRepoLabel(url) {
+        if (!url) {
+          return "Unknown repository";
+        }
+        const cleaned = url.replace(/https?:\/\//i, "").replace(/\.git$/i, "");
+        return cleaned.length > 42 ? `${cleaned.slice(0, 39)}...` : cleaned;
+      }
 
+      async function switchRepository(repoId) {
+        const formData = new URLSearchParams();
+        formData.append("repo_id", repoId);
+
+        const response = await fetch("/switch_repo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData.toString(),
         });
 
+        if (!response.ok) {
+          throw new Error("Unable to switch repository");
+        }
+
+        const data = await response.json();
+        repoStatus.textContent = `Switched active repository: ${data.repo_id}`;
+        repoStatus.classList.remove("status-error");
+        repoStatus.classList.add("status-success");
+        addMessage(
+          "bot",
+          `Switched to repository: ${shortRepoLabel(data.repo_url)}`,
+          "System",
+        );
+      }
+
+      function renderRepoList(repositories, activeRepoId) {
+        repoList.innerHTML = "";
+
+        if (!repositories.length) {
+          const empty = document.createElement("p");
+          empty.className = "repo-empty";
+          empty.textContent = "No repositories indexed in this session yet.";
+          repoList.appendChild(empty);
+          return;
+        }
+
+        repositories.forEach((repo) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "repo-item";
+          if (repo.repo_id === activeRepoId) {
+            button.classList.add("active");
+          }
+
+          const name = document.createElement("span");
+          name.className = "repo-item-url";
+          name.textContent = shortRepoLabel(repo.repo_url);
+
+          const id = document.createElement("span");
+          id.className = "repo-item-id";
+          id.textContent = repo.repo_id;
+
+          button.appendChild(name);
+          button.appendChild(id);
+          button.addEventListener("click", async () => {
+            try {
+              await switchRepository(repo.repo_id);
+              await loadRepositories();
+            } catch (error) {
+              addMessage(
+                "bot",
+                "Unable to switch repository right now.",
+                "System",
+              );
+            }
+          });
+
+          repoList.appendChild(button);
+        });
+      }
+
+      async function loadRepositories() {
+        try {
+          const response = await fetch("/repos", { method: "GET" });
+          if (!response.ok) {
+            throw new Error("Failed to load repositories");
+          }
+          const data = await response.json();
+          renderRepoList(data.repositories || [], data.active_repo_id);
+        } catch (error) {
+          repoList.innerHTML =
+            "<p class='repo-empty'>Unable to load repositories.</p>";
+        }
+      }
+
+      repoForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const url = repoInput.value.trim();
+        if (!url) {
+          return;
+        }
+
+        repoStatus.textContent =
+          "Indexing repository. This may take a moment...";
+        repoStatus.classList.remove("status-error", "status-success");
+
+        const formData = new URLSearchParams();
+        formData.append("question", url);
+
+        try {
+          const response = await fetch("/chatbot", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData.toString(),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to index repository.");
+          }
+
+          const result = await response.json();
+
+          repoStatus.textContent = `Repository indexed successfully. Active repo_id: ${result.repo_id}`;
+          repoStatus.classList.add("status-success");
+          addMessage(
+            "bot",
+            `Repository indexed with repo_id: ${result.repo_id}. Ask your first code question.`,
+            "System",
+          );
+          await loadRepositories();
+        } catch (error) {
+          repoStatus.textContent =
+            "Unable to index repository. Check the URL and try again.";
+          repoStatus.classList.add("status-error");
+        }
       });
 
+      messageForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const prompt = messageInput.value.trim();
+        if (!prompt) {
+          return;
+        }
 
+        addMessage("user", prompt);
+        messageInput.value = "";
+
+        const formData = new URLSearchParams();
+        formData.append("msg", prompt);
+
+        try {
+          const response = await fetch("/get", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData.toString(),
+          });
+
+          if (!response.ok) {
+            throw new Error("Request failed");
+          }
+
+          const data = await response.text();
+          addMessage("bot", data);
+        } catch (error) {
+          addMessage(
+            "bot",
+            "I hit an error while generating a response. Please try again.",
+          );
+        }
+      });
+
+      clearButton.addEventListener("click", async () => {
+        const formData = new URLSearchParams();
+        formData.append("msg", "clear");
+
+        try {
+          const response = await fetch("/get", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData.toString(),
+          });
+
+          const resultText = await response.text();
+          addMessage("bot", resultText, "System");
+          await loadRepositories();
+        } catch (error) {
+          addMessage("bot", "Unable to clear repository right now.", "System");
+        }
+      });
+
+      loadRepositories();
     </script>
-
   </body>
-</html>
-
-
-
-
-
-
-
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<!DOCTYPE html>
-<html>
-	<head>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<!-- <img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img"> -->
-									<img src="https://p7.hiclipart.com/preview/1010/961/279/computer-icons-source-code-html-coding.jpg" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Source Code Analysis</span>
-									<p>Ask anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
-
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
-
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://p7.hiclipart.com/preview/1010/961/279/computer-icons-source-code-html-coding.jpg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
-        
-    </body>
 </html>
