@@ -340,6 +340,14 @@
             body: formData.toString(),
           });
 
+          const contentType = response.headers.get("content-type") || "";
+          if (!contentType.includes("application/json")) {
+            const raw = (await response.text()).replace(/\s+/g, " ").trim();
+            throw new Error(
+              `Server returned non-JSON response (HTTP ${response.status}). ${raw.slice(0, 200)}`,
+            );
+          }
+
           const result = await response.json();
           if (!response.ok) {
             const details =
