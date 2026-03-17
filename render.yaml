@@ -2,6 +2,7 @@ services:
   - type: web
     name: source-code-analysis-genai
     env: python
+    healthCheckPath: /healthz
     buildCommand: pip install -r requirements.txt ; python manage.py collectstatic --noinput
     startCommand: gunicorn codesphere.wsgi:application --log-file -
     envVars:

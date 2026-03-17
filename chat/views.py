@@ -121,6 +121,11 @@ def index(request):
     return render(request, "index.html")
 
 
+def health(request):
+    """Cheap health endpoint for load balancer probes."""
+    return JsonResponse({"status": "ok"})
+
+
 @csrf_exempt
 def git_repo(request):
     """Index a GitHub repository."""
