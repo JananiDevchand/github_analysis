@@ -13,11 +13,11 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.memory import ConversationSummaryMemory
 from langchain.chains import ConversationalRetrievalChain
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from src.helper import repo_ingestion
 
@@ -25,8 +25,9 @@ from src.helper import repo_ingestion
 # Load environment variables
 # ---------------------------------------------------------------------------
 load_dotenv()
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+if GOOGLE_API_KEY:
+    os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
 REPOS_ROOT = Path(settings.BASE_DIR) / "repos"
 VECTORS_ROOT = Path(settings.BASE_DIR) / "db"
