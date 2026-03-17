@@ -65,6 +65,19 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
+# Django 4.2+ preferred storage config; keeps static handling explicit.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+# Fallback so WhiteNoise can serve directly from STATICFILES_DIRS on Render.
+WHITENOISE_USE_FINDERS = True
+
 # Keep session state without a relational DB.
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
