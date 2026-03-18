@@ -16,3 +16,7 @@ services:
         sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: MAX_INDEX_FILES
+        value: "80"
+      - key: MAX_INDEX_FILE_SIZE_BYTES
+        value: "100000"
