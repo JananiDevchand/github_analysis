@@ -63,6 +63,7 @@ DATABASES = {}
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Django 4.2+ preferred storage config; keeps static handling explicit.
 STORAGES = {
