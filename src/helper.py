@@ -97,15 +97,19 @@ def load_repo(repo_path):
 # Creating text chunks 
 def text_splitter(documents):
     documents_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1500,
-        chunk_overlap=200,
+        chunk_size=800,
+        chunk_overlap=100,
     )
     text_chunks = documents_splitter.split_documents(documents)
     return text_chunks
 
 # loading embeddings model
 def load_embedding():
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")  # ✅ HuggingFace embedding
+    # Use distiluse-base-multilingual-cased-v2: ~60MB, optimized for small memory footprint
+    embeddings = HuggingFaceEmbeddings(
+        model_name="distiluse-base-multilingual-cased-v2",
+        model_kwargs={"trust_remote_code": True}
+    )
     return embeddings
 
 

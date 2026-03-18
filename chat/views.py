@@ -45,9 +45,13 @@ def _build_qa_chain(db_path):
     from langchain.chains import ConversationalRetrievalChain
     from langchain_community.embeddings import HuggingFaceEmbeddings
 
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    # Use lightweight embedding model to fit within 512MB Render tier
+    embeddings = HuggingFaceEmbeddings(
+        model_name="distiluse-base-multilingual-cased-v2",
+        model_kwargs={"trust_remote_code": True}
+    )
     vectordb = Chroma(persist_directory=str(db_path), embedding_function=embeddings)
-    llm = GoogleGenerativeAI(model="gemini-3-flash-preview", temperature=0)
+    llm = GoogleGenerativeAI(model="gemini-2-flash", temperature=0)
     memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
     return ConversationalRetrievalChain.from_llm(
         llm,
