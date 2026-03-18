@@ -4,7 +4,7 @@ services:
     env: python
     healthCheckPath: /healthz
     buildCommand: pip install -r requirements.txt ; python manage.py collectstatic --noinput
-    startCommand: gunicorn codesphere.wsgi:application --log-file -
+    startCommand: gunicorn codesphere.wsgi:application --log-file - --timeout 300 --graceful-timeout 60
     envVars:
       - key: DEBUG
         value: "False"

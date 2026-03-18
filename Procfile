@@ -1,1 +1,1 @@
-web: gunicorn codesphere.wsgi:application --log-file -
+web: gunicorn codesphere.wsgi:application --log-file - --timeout 300 --graceful-timeout 60
