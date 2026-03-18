@@ -1,8 +1,10 @@
 import os
 import shutil
+import base64
 from pathlib import Path
 from urllib.parse import urlparse
 from git import Repo
+from git.exc import GitCommandError
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings  # ✅ HuggingFace
@@ -39,6 +41,21 @@ def normalize_repo_url(repo_url):
 
     return f"https://github.com/{owner}/{repo}.git"
 
+
+def _clone_env():
+    env = dict(os.environ)
+    env["GIT_TERMINAL_PROMPT"] = "0"
+    return env
+
+
+def _clone_options_for_github():
+    token = (os.environ.get("GITHUB_TOKEN") or "").strip()
+    if not token:
+        return []
+
+    auth = base64.b64encode(f"x-access-token:{token}".encode("utf-8")).decode("ascii")
+    return [f"-c", f"http.https://github.com/.extraheader=AUTHORIZATION: basic {auth}"]
+
 # clone any github repositories 
 def repo_ingestion(repo_url, repo_path="repo"):
     # Ensure we always index the latest repository content for this repo path.
@@ -48,7 +65,24 @@ def repo_ingestion(repo_url, repo_path="repo"):
     normalized_url = normalize_repo_url(repo_url)
     if shutil.which("git") is None:
         raise RuntimeError("Git executable not found on server.")
-    Repo.clone_from(normalized_url, to_path=repo_path)
+    try:
+        Repo.clone_from(
+            normalized_url,
+            to_path=repo_path,
+            multi_options=_clone_options_for_github(),
+            env=_clone_env(),
+        )
+    except GitCommandError as exc:
+        message = str(exc)
+        if (
+            "could not read Username" in message
+            or "Authentication failed" in message
+            or "Repository not found" in message
+        ):
+            raise RuntimeError(
+                "Repository access denied. If this is private, set GITHUB_TOKEN in Render with repo read access."
+            ) from None
+        raise RuntimeError("Failed to clone repository. Verify the URL and access permissions.") from None
 
 # Loading repositories as documents
 def load_repo(repo_path):
