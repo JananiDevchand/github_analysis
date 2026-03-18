@@ -35,6 +35,9 @@ def _repo_paths(repo_id):
 
 def _build_qa_chain(db_path):
     """Create a fresh retrieval chain from the persisted vector store."""
+    if not os.environ.get("GOOGLE_API_KEY"):
+        raise RuntimeError("GOOGLE_API_KEY environment variable is not set. Cannot initialize LLM.")
+    
     # Lazy imports keep web process startup fast on cold starts.
     from langchain_community.vectorstores import Chroma
     from langchain_google_genai import GoogleGenerativeAI
