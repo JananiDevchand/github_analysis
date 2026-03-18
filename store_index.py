@@ -1,13 +1,22 @@
 # store_index.py
 import argparse
+import os
 
 from src.helper import load_repo, text_splitter, load_embedding
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 
 def build_index(repo_path, db_path):
+	# Validate environment before proceeding
+	if not os.environ.get("GOOGLE_API_KEY"):
+		raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
+	
 	# Load documents from the selected repo path
 	documents = load_repo(repo_path)
+	if not documents:
+		raise ValueError("No supported files found in repository to index.")
 	text_chunks = text_splitter(documents)
+	if not text_chunks:
+		raise ValueError("Repository files were loaded, but no text chunks were created.")
 
 	# Load HuggingFace embeddings
 	embeddings = load_embedding()
